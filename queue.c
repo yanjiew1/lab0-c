@@ -32,7 +32,7 @@ static inline void q_free_elem(element_t *elem)
 static inline void q_copy_string(char *dest, size_t size, const char *src)
 {
     dest[size - 1] = '\0';
-    for (int i = 0; i < size - 1; i++)
+    for (int i = 0; i < size - 1 && src[i] != '\0'; i++)
         dest[i] = src[i];
 }
 
