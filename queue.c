@@ -51,13 +51,12 @@ struct list_head *q_new()
 /* Free all storage used by queue */
 void q_free(struct list_head *l)
 {
-    struct list_head *safe;
-    struct list_head *it;
+    element_t *safe;
+    element_t *it;
 
-    list_for_each_safe (it, safe, l) {
-        element_t *elem = list_entry(it, element_t, list);
-        list_del(it);
-        q_free_elem(elem);
+    list_for_each_entry_safe (it, safe, l, list) {
+        list_del(&it->list);
+        q_free_elem(it);
     }
 
     free(l);
