@@ -30,8 +30,10 @@ void q_free(struct list_head *l)
     struct list_head *it;
 
     list_for_each_safe (it, safe, l) {
+        element_t *elem = list_entry(it, element_t, list);
         list_del(it);
-        free(it);
+        free(elem->value);
+        free(elem);
     }
 
     free(l);
