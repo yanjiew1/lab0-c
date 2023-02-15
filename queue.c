@@ -10,6 +10,24 @@
  *   cppcheck-suppress nullPointer
  */
 
+/* Create a new element with the provided string */
+static inline element_t *q_new_elem(char *s)
+{
+    element_t *elem = malloc(sizeof(element_t));
+    if (!elem)
+        return NULL;
+
+    elem->value = strdup(s);
+
+    return elem;
+}
+
+/* Free all storage used by the element */
+static inline void q_free_elem(element_t *elem)
+{
+    free(elem->value);
+    free(elem);
+}
 
 /* Create an empty queue */
 struct list_head *q_new()
@@ -32,8 +50,7 @@ void q_free(struct list_head *l)
     list_for_each_safe (it, safe, l) {
         element_t *elem = list_entry(it, element_t, list);
         list_del(it);
-        free(elem->value);
-        free(elem);
+        q_free_elem(elem);
     }
 
     free(l);
@@ -42,11 +59,10 @@ void q_free(struct list_head *l)
 /* Insert an element at head of queue */
 bool q_insert_head(struct list_head *head, char *s)
 {
-    element_t *elem = malloc(sizeof(element_t));
+    element_t *elem = q_new_elem(s);
     if (!elem)
         return false;
 
-    elem->value = strdup(s);
     list_add(&elem->list, head);
 
     return true;
@@ -55,12 +71,10 @@ bool q_insert_head(struct list_head *head, char *s)
 /* Insert an element at tail of queue */
 bool q_insert_tail(struct list_head *head, char *s)
 {
-    element_t *elem = malloc(sizeof(element_t));
-
+    element_t *elem = q_new_elem(s);
     if (!elem)
         return false;
 
-    elem->value = strdup(s);
     list_add_tail(&elem->list, head);
 
     return true;
