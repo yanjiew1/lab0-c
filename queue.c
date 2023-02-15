@@ -29,6 +29,13 @@ static inline void q_free_elem(element_t *elem)
     free(elem);
 }
 
+static inline void q_copy_string(char *dest, size_t size, const char *src)
+{
+    dest[size - 1] = '\0';
+    for (int i = 0; i < size - 1; i++)
+        dest[i] = src[i];
+}
+
 /* Create an empty queue */
 struct list_head *q_new()
 {
@@ -83,13 +90,31 @@ bool q_insert_tail(struct list_head *head, char *s)
 /* Remove an element from head of queue */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if (list_empty(head))
+        return NULL;
+
+    element_t *elem = list_first_entry(head, element_t, list);
+    list_del(&elem->list);
+
+    if (sp)
+        q_copy_string(sp, bufsize, elem->value);
+
+    return elem;
 }
 
 /* Remove an element from tail of queue */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if (list_empty(head))
+        return NULL;
+
+    element_t *elem = list_last_entry(head, element_t, list);
+    list_del(&elem->list);
+
+    if (sp)
+        q_copy_string(sp, bufsize, elem->value);
+
+    return elem;
 }
 
 /* Return number of elements in queue */
