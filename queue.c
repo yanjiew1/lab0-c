@@ -32,7 +32,7 @@ static inline void q_copy_string(char *dest, size_t size, const char *src)
     if (!size)
         return;
 
-    int i;
+    size_t i;
     dest[size - 1] = '\0';
     for (i = 0; i < size - 1; i++) {
         dest[i] = src[i];
