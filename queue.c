@@ -201,6 +201,7 @@ void q_reverseK(struct list_head *head, int k)
 void q_swap(struct list_head *head)
 {
     // https://leetcode.com/problems/swap-nodes-in-pairs/
+    q_reverseK(head, 2);
 }
 
 /* Sort elements of queue in ascending order */
