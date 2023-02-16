@@ -22,13 +22,6 @@ static inline element_t *q_new_elem(char *s)
     return elem;
 }
 
-/* Free all storage used by the element */
-static inline void q_free_elem(element_t *elem)
-{
-    free(elem->value);
-    free(elem);
-}
-
 static inline void q_copy_string(char *dest, size_t size, const char *src)
 {
     dest[size - 1] = '\0';
@@ -56,7 +49,7 @@ void q_free(struct list_head *l)
 
     list_for_each_entry_safe (it, safe, l, list) {
         list_del(&it->list);
-        q_free_elem(it);
+        q_release_element(it);
     }
 
     free(l);
@@ -145,7 +138,7 @@ bool q_delete_mid(struct list_head *head)
 
     list_del(right);
     element_t *elem = list_entry(right, element_t, list);
-    q_free_elem(elem);
+    q_release_element(elem);
 
     return true;
 }
