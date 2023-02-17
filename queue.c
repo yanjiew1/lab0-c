@@ -213,9 +213,8 @@ void q_swap(struct list_head *head)
 void q_sort(struct list_head *head)
 {
     /* Try to use merge sort*/
-    if (!head || list_empty(head) || list_is_singular(head)) {
+    if (!head || list_empty(head) || list_is_singular(head))
         return;
-    }
 
     /* Find middle point */
     struct list_head *mid;
