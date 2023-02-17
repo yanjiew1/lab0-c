@@ -294,5 +294,26 @@ int q_descend(struct list_head *head)
 int q_merge(struct list_head *head)
 {
     // https://leetcode.com/problems/merge-k-sorted-lists/
-    return 0;
+    if (!head)
+        return 0;
+
+    /**
+     * Not quite optimized but can be done in O(nlogn)
+     * It can be improve later.
+     */
+    LIST_HEAD(tmp);
+    queue_contex_t *it;
+    /**
+     * The macro, list_for_each_entry, exists,
+     * but cppcheck tells me it is unknown
+     */
+    // cppcheck-suppress unknownMacro
+    list_for_each_entry (it, head, chain)
+        list_splice_init(it->q, &tmp);
+
+    int size = q_size(&tmp);
+    q_sort(&tmp);
+    list_splice(&tmp, list_first_entry(head, queue_contex_t, chain)->q);
+
+    return size;
 }
