@@ -29,9 +29,16 @@ static inline element_t *q_new_elem(char *s)
 
 static inline void q_copy_string(char *dest, size_t size, const char *src)
 {
+    if (!size)
+        return;
+
+    int i;
     dest[size - 1] = '\0';
-    for (int i = 0; i < size - 1 && src[i] != '\0'; i++)
+    for (i = 0; i < size - 1; i++) {
         dest[i] = src[i];
+        if (dest[i] == '\0')
+            break;
+    }
 }
 
 /* Create an empty queue */
