@@ -272,7 +272,7 @@ void q_sort(struct list_head *head)
     /* Merge */
     while (!list_empty(&left) && !list_empty(&right)) {
         if (strcmp(list_first_entry(&left, element_t, list)->value,
-                   list_first_entry(&right, element_t, list)->value) < 0) {
+                   list_first_entry(&right, element_t, list)->value) <= 0) {
             list_move_tail(left.next, head);
         } else {
             list_move_tail(right.next, head);
