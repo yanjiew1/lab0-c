@@ -210,7 +210,51 @@ void q_swap(struct list_head *head)
 }
 
 /* Sort elements of queue in ascending order */
-void q_sort(struct list_head *head) {}
+void q_sort(struct list_head *head)
+{
+    /* Try to use merge sort*/
+    if (!head || list_empty(head) || list_is_singular(head)) {
+        return;
+    }
+
+    /* Find middle point */
+    struct list_head *mid;
+    {
+        struct list_head *left, *right;
+        left = head->next;
+        right = head->prev;
+
+        while (left != right && left->next != right) {
+            left = left->next;
+            right = right->prev;
+        }
+        mid = left;
+    }
+
+    /* Divide into two part */
+    LIST_HEAD(left);
+    LIST_HEAD(right);
+
+    list_cut_position(&left, head, mid);
+    list_splice_init(head, &right);
+
+    /* Conquer */
+    q_sort(&left);
+    q_sort(&right);
+
+    /* Merge */
+    while (!list_empty(&left) && !list_empty(&right)) {
+        if (strcmp(list_first_entry(&left, element_t, list)->value,
+                   list_first_entry(&right, element_t, list)->value) < 0) {
+            list_move_tail(left.next, head);
+        } else {
+            list_move_tail(right.next, head);
+        }
+    }
+
+    list_splice_tail(&left, head);
+    list_splice_tail(&right, head);
+}
 
 /* Remove every node which has a node with a strictly greater value anywhere to
  * the right side of it */
