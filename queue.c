@@ -18,7 +18,7 @@ static inline element_t *q_new_elem(char *s)
         return NULL;
 
     char *tmp = strdup(s);
-    if (!elem->value) {
+    if (!tmp) {
         free(elem);
         return NULL;
     }
