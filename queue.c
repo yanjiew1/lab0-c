@@ -14,12 +14,11 @@
 static inline element_t *q_new_elem(char *s)
 {
     element_t *elem = malloc(sizeof(element_t));
-    if (!elem)
-        return NULL;
-
     char *tmp = strdup(s);
-    if (!tmp) {
+
+    if (!elem || !tmp) {
         free(elem);
+        free(tmp);
         return NULL;
     }
 
