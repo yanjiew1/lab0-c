@@ -181,10 +181,8 @@ bool q_delete_dup(struct list_head *head)
     }
 
     /* empty trash */
-    list_for_each_entry_safe (it, safe, &trash, list) {
-        list_del(&it->list);
+    list_for_each_entry_safe (it, safe, &trash, list)
         q_release_element(it);
-    }
 
     return true;
 }
