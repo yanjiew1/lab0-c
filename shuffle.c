@@ -20,8 +20,11 @@ bool q_shuffle(struct list_head *head)
 
     /* Fisher–Yates shuffle */
     for (i = size - 1; i > 0; i--) {
-        /* The random generator can be improved to avoid bias */
-        int n = rand() % (i + 1);
+        int n;
+        do {
+            n = rand();
+        } while (n >= RAND_MAX - (RAND_MAX % (i + 1)));
+        n %= i + 1;
         /* swap i-th and n-th element */
         struct list_head *tmp = entries[i];
         entries[i] = entries[n];
