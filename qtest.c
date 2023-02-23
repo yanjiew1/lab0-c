@@ -967,7 +967,11 @@ static bool do_shuffle(int argc, char *argv[])
         return false;
     }
 
-    q_shuffle(current->q);
+    bool ret = q_shuffle(current->q);
+    if (!ret) {
+        report(3, "Warning: Shuffle failed");
+    }
+
     q_show(3);
 
     return true;

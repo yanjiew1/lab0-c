@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include "queue.h"
 
-void q_shuffle(struct list_head *head)
+bool q_shuffle(struct list_head *head)
 {
     if (!head || list_empty(head))
-        return;
+        return false;
 
     int size = q_size(head);
     struct list_head **entries = malloc(sizeof(struct list_head *) * size);
     if (!entries)
-        return;
+        return false;
 
     /* Fill in entries array */
     struct list_head *node;
@@ -27,11 +27,11 @@ void q_shuffle(struct list_head *head)
         entries[i] = entries[n];
         entries[n] = tmp;
     }
-
     /* Rebuild list */
     INIT_LIST_HEAD(head);
     for (i = 0; i < size; i++)
         list_add_tail(entries[i], head);
 
     free(entries);
+    return true;
 }
