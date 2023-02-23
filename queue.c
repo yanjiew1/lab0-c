@@ -290,7 +290,7 @@ int q_descend(struct list_head *head)
     element_t *cur = list_last_entry(head, element_t, list);
     while (cur->list.prev != head) {
         element_t *prev = list_last_entry(&cur->list, element_t, list);
-        if (strcmp(prev->value, cur->value) <= 0) {
+        if (strcmp(prev->value, cur->value) < 0) {
             list_del(&prev->list);
             q_release_element(prev);
         } else {
