@@ -1,5 +1,6 @@
 #include "shuffle.h"
 #include <stdlib.h>
+#include "qrandom.h"
 #include "queue.h"
 
 bool q_shuffle(struct list_head *head)
@@ -20,11 +21,7 @@ bool q_shuffle(struct list_head *head)
 
     /* Fisher–Yates shuffle */
     for (i = size - 1; i > 0; i--) {
-        int n;
-        do {
-            n = rand();
-        } while (n >= RAND_MAX - (RAND_MAX % (i + 1)));
-        n %= i + 1;
+        int n = qrandom_int(i);
         /* swap i-th and n-th element */
         struct list_head *tmp = entries[i];
         entries[i] = entries[n];

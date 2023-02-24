@@ -22,6 +22,7 @@
 #include "dudect/fixture.h"
 #include "ksort.h"
 #include "list.h"
+#include "qrandom.h"
 #include "random.h"
 #include "shuffle.h"
 #include "xoshiro.h"
@@ -78,10 +79,6 @@ static int string_length = MAXSTRING;
 
 /* Whether to use sorting algorithm from kernel */
 static int use_ksort = 0;
-
-/* The random bytes implementation */
-/* 0: system, 1: xoshiro */
-static int randombytes_impl = 0;
 
 #define MIN_RANDSTR_LEN 5
 #define MAX_RANDSTR_LEN 10
@@ -181,10 +178,7 @@ static void fill_rand_string(char *buf, size_t buf_size)
     while (len < MIN_RANDSTR_LEN)
         len = rand() % buf_size;
 
-    if (randombytes_impl)
-        xoshiro_bytes((uint8_t *) buf, len);
-    else
-        randombytes((uint8_t *) buf, len);
+    qrandombytes((uint8_t *) buf, len);
     for (size_t n = 0; n < len; n++)
         buf[n] = charset[buf[n] % (sizeof(charset) - 1)];
     buf[len] = '\0';
@@ -1028,8 +1022,10 @@ static void console_init()
               "Number of times allow queue operations to return false", NULL);
     add_param("ksort", &use_ksort,
               "Whether to use Linux kernel sorting algorithm", NULL);
-    add_param("randombytes", &randombytes_impl,
-              "Which random number generator to use for random bytes", NULL);
+    add_param(
+        "random", &qrandom_impl,
+        "Which random number generator to use (0: Linux kernel, 1: xoshiro)",
+        NULL);
 }
 
 /* Signal handlers */
@@ -1202,7 +1198,9 @@ int main(int argc, char *argv[])
     /* A better seed can be obtained by combining getpid() and its parent ID
      * with the Unix time.
      */
-    srand(os_random(getpid() ^ getppid()));
+    int tmp = os_random(getpid() ^ getppid());
+    srand(tmp);
+    xoshiro_seed(tmp);
 
     q_init();
     init_cmd();

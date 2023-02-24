@@ -43,7 +43,7 @@ OBJS := qtest.o report.o console.o harness.o queue.o \
         linenoise.o web.o \
         ksort.o list_sort.o \
         shuffle.o \
-		xoshiro.o
+		xoshiro.o qrandom.o
 
 deps := $(OBJS:%.o=.%.o.d)
 
