@@ -16,7 +16,9 @@
 
 #include "xoshiro.h"
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 static uint64_t splitmix64_s = 0;
 
@@ -64,4 +66,18 @@ uint64_t xoshiro(void)
     s[2] ^= t;
     s[3] = rotl(s[3], 45);
     return result;
+}
+
+void xoshiro_bytes(uint8_t *dest, const size_t len)
+{
+    uint64_t tmp;
+    for (size_t i = 0; i < len; i += 8) {
+        tmp = xoshiro();
+        memcpy(&dest[i], &tmp, 8);
+    }
+
+    if (len % 8) {
+        tmp = xoshiro();
+        memcpy(&dest[len - (len % 8)], &tmp, len % 8);
+    }
 }
