@@ -71,7 +71,7 @@ uint64_t xoshiro(void)
 void xoshiro_bytes(uint8_t *dest, const size_t len)
 {
     uint64_t tmp;
-    for (size_t i = 0; i < len; i += 8) {
+    for (size_t i = 0; i < (len % 8); i += 8) {
         tmp = xoshiro();
         memcpy(&dest[i], &tmp, 8);
     }

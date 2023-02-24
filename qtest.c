@@ -20,14 +20,11 @@
 #endif
 
 #include "dudect/fixture.h"
+#include "ksort.h"
 #include "list.h"
 #include "random.h"
-
-/* q_ksort: sort using Linux kernel implementation */
-#include "ksort.h"
-
-/* q_shuffle */
 #include "shuffle.h"
+#include "xoshiro.h"
 
 /* Shannon entropy */
 extern double shannon_entropy(const uint8_t *input_data);
@@ -81,6 +78,10 @@ static int string_length = MAXSTRING;
 
 /* Whether to use sorting algorithm from kernel */
 static int use_ksort = 0;
+
+/* The random bytes implementation */
+/* 0: system, 1: xoshiro */
+static int randombytes_impl = 0;
 
 #define MIN_RANDSTR_LEN 5
 #define MAX_RANDSTR_LEN 10
@@ -180,7 +181,10 @@ static void fill_rand_string(char *buf, size_t buf_size)
     while (len < MIN_RANDSTR_LEN)
         len = rand() % buf_size;
 
-    randombytes((uint8_t *) buf, len);
+    if (randombytes_impl)
+        xoshiro_bytes((uint8_t *) buf, len);
+    else
+        randombytes((uint8_t *) buf, len);
     for (size_t n = 0; n < len; n++)
         buf[n] = charset[buf[n] % (sizeof(charset) - 1)];
     buf[len] = '\0';
@@ -1024,6 +1028,8 @@ static void console_init()
               "Number of times allow queue operations to return false", NULL);
     add_param("ksort", &use_ksort,
               "Whether to use Linux kernel sorting algorithm", NULL);
+    add_param("randombytes", &randombytes_impl,
+              "Which random number generator to use for random bytes", NULL);
 }
 
 /* Signal handlers */
