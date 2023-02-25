@@ -41,9 +41,11 @@ static inline uint64_t rotl(const uint64_t x, int k)
 }
 
 static uint64_t s[4];
+static bool seeded = false;
 
 void xoshiro_seed(const uint64_t seed)
 {
+    seeded = true;
     splitmix64_seed(seed);
     for (int i = 0; i < 4; i++)
         s[i] = splitmix64();
@@ -51,11 +53,8 @@ void xoshiro_seed(const uint64_t seed)
 
 uint64_t xoshiro(void)
 {
-    static bool seeded = false;
-    if (!seeded) {
+    if (!seeded)
         xoshiro_seed(0);
-        seeded = true;
-    }
 
     const uint64_t result = rotl(s[0] + s[3], 23) + s[0];
     const uint64_t t = s[1] << 17;
@@ -71,7 +70,7 @@ uint64_t xoshiro(void)
 void xoshiro_bytes(uint8_t *dest, const size_t len)
 {
     uint64_t tmp;
-    for (size_t i = 0; i < (len % 8); i += 8) {
+    for (size_t i = 0; i < len - (len % 8); i += 8) {
         tmp = xoshiro();
         memcpy(&dest[i], &tmp, 8);
     }

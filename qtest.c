@@ -1148,6 +1148,21 @@ uintptr_t os_random(uintptr_t seed)
     return x;
 }
 
+#define RANDOM_BYTES 1048576
+static void generate_randombytes(void)
+{
+    uint8_t *buf = malloc(RANDOM_BYTES);
+    if (!buf)
+        exit(1);
+
+    do {
+        qrandombytes(buf, RANDOM_BYTES);
+    } while (fwrite(buf, RANDOM_BYTES, 1, stdout));
+
+    fflush(stdout);
+    exit(0);
+}
+
 #define BUFSIZE 256
 int main(int argc, char *argv[])
 {
@@ -1163,7 +1178,15 @@ int main(int argc, char *argv[])
     int level = 4;
     int c;
 
-    while ((c = getopt(argc, argv, "hv:f:l:")) != -1) {
+    /*
+     * A better seed can be obtained by combining getpid() and its parent ID
+     * with the Unix time.
+     */
+    int tmp = os_random(getpid() ^ getppid());
+    srand(tmp);
+    xoshiro_seed(tmp);
+
+    while ((c = getopt(argc, argv, "hv:f:l:r:")) != -1) {
         switch (c) {
         case 'h':
             usage(argv[0]);
@@ -1188,19 +1211,22 @@ int main(int argc, char *argv[])
             buf[BUFSIZE - 1] = '\0';
             logfile_name = lbuf;
             break;
+        case 'r':
+            char *endptr;
+            errno = 0;
+            qrandom_impl = strtol(optarg, &endptr, 10);
+            if (errno != 0 || endptr == optarg) {
+                fprintf(stderr, "Invalid random number generator\n");
+                exit(EXIT_FAILURE);
+            }
+            generate_randombytes();
+            break;
         default:
             printf("Unknown option '%c'\n", c);
             usage(argv[0]);
             break;
         }
     }
-
-    /* A better seed can be obtained by combining getpid() and its parent ID
-     * with the Unix time.
-     */
-    int tmp = os_random(getpid() ^ getppid());
-    srand(tmp);
-    xoshiro_seed(tmp);
 
     q_init();
     init_cmd();
