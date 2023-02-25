@@ -1159,7 +1159,6 @@ static void generate_randombytes(void)
         qrandombytes(buf, RANDOM_BYTES);
     } while (fwrite(buf, RANDOM_BYTES, 1, stdout));
 
-    fflush(stdout);
     exit(0);
 }
 
