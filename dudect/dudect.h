@@ -90,10 +90,24 @@
 */
 #define DUDECT_TESTS (1 + DUDECT_NUMBER_PERCENTILES + 1)
 
-typedef struct {
+typedef struct __dudect_config dudect_config_t;
+
+typedef void (*dudect_prepare_func_t)(void *priv,
+                                      dudect_config_t *conf,
+                                      uint8_t *input_data,
+                                      uint8_t *classes);
+
+typedef uint8_t (*dudect_compute_func_t)(void *priv,
+                                         dudect_config_t *conf,
+                                         uint8_t *data);
+
+struct __dudect_config {
     size_t chunk_size;
     size_t number_measurements;
-} dudect_config_t;
+    void *priv;
+    dudect_prepare_func_t prepare;
+    dudect_compute_func_t compute;
+};
 
 typedef struct {
     double mean[2];
@@ -123,18 +137,5 @@ DUDECT_VISIBILITY dudect_state_t dudect_main(dudect_ctx_t *c);
 DUDECT_VISIBILITY int dudect_free(dudect_ctx_t *ctx);
 DUDECT_VISIBILITY void randombytes(uint8_t *x, size_t how_much);
 DUDECT_VISIBILITY uint8_t randombit(void);
-
-/* Public configuration */
-
-/* Implementation details */
-#include <inttypes.h>
-#include <stddef.h>
-#include <stdint.h>
-
-// kill this
-extern void prepare_inputs(dudect_config_t *c,
-                           uint8_t *input_data,
-                           uint8_t *classes);
-extern uint8_t do_one_computation(uint8_t *data);
 
 #endif /* DUDECT_H_INCLUDED */

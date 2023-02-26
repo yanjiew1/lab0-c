@@ -212,7 +212,8 @@ static void measure(dudect_ctx_t *ctx)
 {
     for (size_t i = 0; i < ctx->config->number_measurements; i++) {
         ctx->ticks[i] = cpucycles();
-        do_one_computation(ctx->input_data + i * ctx->config->chunk_size);
+        ctx->config->compute(ctx->config->priv, ctx->config,
+                             ctx->input_data + i * ctx->config->chunk_size);
     }
 
     for (size_t i = 0; i < ctx->config->number_measurements - 1; i++) {
@@ -353,7 +354,8 @@ static dudect_state_t report(dudect_ctx_t *ctx)
 
 dudect_state_t dudect_main(dudect_ctx_t *ctx)
 {
-    prepare_inputs(ctx->config, ctx->input_data, ctx->classes);
+    ctx->config->prepare(ctx->config->priv, ctx->config, ctx->input_data,
+                         ctx->classes);
     measure(ctx);
 
     bool first_time = ctx->percentiles[DUDECT_NUMBER_PERCENTILES - 1] == 0;
