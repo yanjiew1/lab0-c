@@ -19,7 +19,7 @@
 #include <time.h>
 #endif
 
-#include "dudect/fixture.h"
+#include "dudect/measure.h"
 #include "ksort.h"
 #include "list.h"
 #include "qrandom.h"
@@ -192,8 +192,10 @@ static bool queue_insert(position_t pos, int argc, char *argv[])
             report(1, "%s does not need arguments in simulation mode", argv[0]);
             return false;
         }
+        set_cautious_mode(false);
         bool ok =
             pos == POS_TAIL ? is_insert_tail_const() : is_insert_head_const();
+        set_cautious_mode(true);
         if (!ok) {
             report(1,
                    "ERROR: Probably not constant time or wrong implementation");
@@ -304,8 +306,10 @@ static bool queue_remove(position_t pos, int argc, char *argv[])
             report(1, "%s does not need arguments in simulation mode", argv[0]);
             return false;
         }
+        set_cautious_mode(false);
         bool ok =
             pos == POS_TAIL ? is_remove_tail_const() : is_remove_head_const();
+        set_cautious_mode(true);
         if (!ok) {
             report(1,
                    "ERROR: Probably not constant time or wrong implementation");

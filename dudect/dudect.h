@@ -98,7 +98,7 @@ typedef void (*dudect_prepare_func_t)(void *priv,
                                       uint8_t *classes);
 
 typedef uint8_t (*dudect_compute_func_t)(void *priv,
-                                         dudect_config_t *conf,
+                                         size_t size,
                                          uint8_t *data);
 
 struct __dudect_config {
@@ -127,7 +127,8 @@ typedef struct {
 
 typedef enum {
     DUDECT_LEAKAGE_FOUND = 0,
-    DUDECT_NO_LEAKAGE_EVIDENCE_YET
+    DUDECT_NO_LEAKAGE_EVIDENCE_YET,
+    DUDECT_NOT_ENOUGHT_MEASUREMENTS,
 } dudect_state_t;
 
 /* Public API */
@@ -135,7 +136,5 @@ typedef enum {
 DUDECT_VISIBILITY int dudect_init(dudect_ctx_t *ctx, dudect_config_t *conf);
 DUDECT_VISIBILITY dudect_state_t dudect_main(dudect_ctx_t *c);
 DUDECT_VISIBILITY int dudect_free(dudect_ctx_t *ctx);
-DUDECT_VISIBILITY void randombytes(uint8_t *x, size_t how_much);
-DUDECT_VISIBILITY uint8_t randombit(void);
 
 #endif /* DUDECT_H_INCLUDED */

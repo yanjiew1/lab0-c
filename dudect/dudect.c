@@ -64,6 +64,7 @@
  * follows would be dudect.c */
 
 #include "dudect.h"
+#include "random.h"
 
 #define DUDECT_TRACE (0)
 
@@ -147,47 +148,6 @@ static void prepare_percentiles(dudect_ctx_t *ctx)
     }
 }
 
-/* this comes from ebacs */
-void randombytes(uint8_t *x, size_t how_much)
-{
-    ssize_t i;
-    static int fd = -1;
-
-    ssize_t xlen = (ssize_t) how_much;
-    assert(xlen >= 0);
-    if (fd == -1) {
-        for (;;) {
-            fd = open("/dev/urandom", O_RDONLY);
-            if (fd != -1)
-                break;
-            sleep(1);
-        }
-    }
-
-    while (xlen > 0) {
-        if (xlen < 1048576)
-            i = xlen;
-        else
-            i = 1048576;
-
-        i = read(fd, x, (size_t) i);
-        if (i < 1) {
-            sleep(1);
-            continue;
-        }
-
-        x += i;
-        xlen -= i;
-    }
-}
-
-uint8_t randombit(void)
-{
-    uint8_t ret = 0;
-    randombytes(&ret, 1);
-    return (ret & 1);
-}
-
 /*
  Intel actually recommends calling CPUID to serialize the execution flow
  and reduce variance in measurement due to out-of-order execution.
@@ -212,7 +172,7 @@ static void measure(dudect_ctx_t *ctx)
 {
     for (size_t i = 0; i < ctx->config->number_measurements; i++) {
         ctx->ticks[i] = cpucycles();
-        ctx->config->compute(ctx->config->priv, ctx->config,
+        ctx->config->compute(ctx->config->priv, ctx->config->chunk_size,
                              ctx->input_data + i * ctx->config->chunk_size);
     }
 
@@ -312,11 +272,12 @@ static dudect_state_t report(dudect_ctx_t *ctx)
     // print the number of measurements of the test that yielded max t.
     // sometimes you can see this number go down - this can be confusing
     // but can happen (different test)
+    printf("\033[A\033[2K");
     printf("meas: %7.2lf M, ", (number_traces_max_t / 1e6));
     if (number_traces_max_t < DUDECT_ENOUGH_MEASUREMENTS) {
         printf("not enough measurements (%.0f still to go).\n",
                DUDECT_ENOUGH_MEASUREMENTS - number_traces_max_t);
-        return DUDECT_NO_LEAKAGE_EVIDENCE_YET;
+        return DUDECT_NOT_ENOUGHT_MEASUREMENTS;
     }
 
     /*
@@ -360,7 +321,7 @@ dudect_state_t dudect_main(dudect_ctx_t *ctx)
 
     bool first_time = ctx->percentiles[DUDECT_NUMBER_PERCENTILES - 1] == 0;
 
-    dudect_state_t ret = DUDECT_NO_LEAKAGE_EVIDENCE_YET;
+    dudect_state_t ret = DUDECT_NOT_ENOUGHT_MEASUREMENTS;
     if (first_time) {
         // throw away the first batch of measurements.
         // this helps warming things up.
@@ -378,6 +339,9 @@ int dudect_init(dudect_ctx_t *ctx, dudect_config_t *conf)
     ctx->config = calloc(1, sizeof(*conf));
     ctx->config->number_measurements = conf->number_measurements;
     ctx->config->chunk_size = conf->chunk_size;
+    ctx->config->compute = conf->compute;
+    ctx->config->prepare = conf->prepare;
+    ctx->config->priv = conf->priv;
     ctx->ticks = calloc(ctx->config->number_measurements, sizeof(int64_t));
     ctx->exec_times = calloc(ctx->config->number_measurements, sizeof(int64_t));
     ctx->classes = calloc(ctx->config->number_measurements, sizeof(uint8_t));
