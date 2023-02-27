@@ -1,7 +1,5 @@
 #include "measure.h"
 #include "dudect.h"
-#include "harness.h"
-#include "qrandom.h"
 #include "queue.h"
 #include "random.h"
 
@@ -50,8 +48,11 @@ static void fixed_string(uint8_t *buf, size_t len)
 
 static void random_string(uint8_t *buf, size_t len)
 {
-    for (size_t i = 0; i < len - 1; i++)
-        buf[i] = 'a' + (qrandom_int(25));
+    uint8_t rand;
+    for (size_t i = 0; i < len - 1; i++) {
+        randombytes(&rand, 1);
+        buf[i] = 'a' + (rand % 26);
+    }
     buf[len - 1] = '\0';
 }
 
