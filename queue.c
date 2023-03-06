@@ -185,7 +185,7 @@ void q_reverse(struct list_head *head)
 void q_reverseK(struct list_head *head, int k)
 {
     // https://leetcode.com/problems/reverse-nodes-in-k-group/
-    if (!head)
+    if (!head || list_empty(head))
         return;
     struct list_head *it, *safe, *cut;
     int cnt = k;
