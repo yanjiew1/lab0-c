@@ -26,15 +26,6 @@ static inline element_t *q_new_elem(char *s)
     return elem;
 }
 
-static inline void q_copy_string(char *dest, size_t size, const char *src)
-{
-    size_t i;
-    for (i = 0; i < size - 1 && src[i] != '\0'; i++)
-        dest[i] = src[i];
-
-    dest[i] = '\0';
-}
-
 /* Create an empty queue */
 struct list_head *q_new()
 {
@@ -99,8 +90,11 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
     element_t *elem = list_first_entry(head, element_t, list);
     list_del(&elem->list);
 
-    if (sp && bufsize)
-        q_copy_string(sp, bufsize, elem->value);
+    if (!sp || !bufsize)
+        return elem;
+
+    strncpy(sp, elem->value, bufsize);
+    sp[bufsize - 1] = '\0';
 
     return elem;
 }
@@ -114,8 +108,11 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
     element_t *elem = list_last_entry(head, element_t, list);
     list_del(&elem->list);
 
-    if (sp && bufsize)
-        q_copy_string(sp, bufsize, elem->value);
+    if (!sp || !bufsize)
+        return elem;
+
+    strncpy(sp, elem->value, bufsize);
+    sp[bufsize - 1] = '\0';
 
     return elem;
 }
