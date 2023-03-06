@@ -318,12 +318,12 @@ int q_merge(struct list_head *head)
                 break;
 
             if (x->size < z->size) {
-                x->size = q_merge_two(x->q, y->q);
-                list_move(&y->chain, &empty);
+                y->size = q_merge_two(y->q, x->q);
+                list_move(&x->chain, &empty);
                 n--;
             } else {
-                y->size = q_merge_two(y->q, z->q);
-                list_move(&z->chain, &empty);
+                z->size = q_merge_two(z->q, y->q);
+                list_move(&y->chain, &empty);
                 n--;
             }
         }
@@ -334,8 +334,8 @@ int q_merge(struct list_head *head)
         queue_contex_t *x, *y;
         x = list_first_entry(&pending, queue_contex_t, chain);
         y = list_first_entry(&x->chain, queue_contex_t, chain);
-        x->size = q_merge_two(x->q, y->q);
-        list_move(&y->chain, &empty);
+        y->size = q_merge_two(y->q, x->q);
+        list_move(&x->chain, &empty);
         n--;
     }
 
