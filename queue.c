@@ -177,9 +177,8 @@ void q_reverse(struct list_head *head)
 
     struct list_head *it, *safe;
     /* Iterate the list and move each item to the head */
-    list_for_each_safe (it, safe, head) {
+    list_for_each_safe (it, safe, head)
         list_move(it, head);
-    }
 }
 
 /* Reverse the nodes of the list k at a time */
