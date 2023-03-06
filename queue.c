@@ -151,7 +151,7 @@ bool q_delete_dup(struct list_head *head)
     struct list_head *cut = head;
 
     list_for_each_entry_safe (it, safe, head, list) {
-        if (&safe->list != head && strcmp(safe->value, it->value) == 0)
+        if (&safe->list != head && !strcmp(safe->value, it->value))
             continue;
         /* Detect duplicated elements */
         if (it->list.prev != cut) {
