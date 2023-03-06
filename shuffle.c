@@ -9,7 +9,7 @@ bool q_shuffle(struct list_head *head)
         return false;
 
     int size = q_size(head);
-    struct list_head **entries = malloc(sizeof(struct list_head *) * size);
+    struct list_head **entries = malloc(sizeof(*entries) * size);
     if (!entries)
         return false;
 
