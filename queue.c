@@ -209,6 +209,31 @@ void q_swap(struct list_head *head)
     q_reverseK(head, 2);
 }
 
+/* Merge two sorted list into `first` list */
+/* Thanks `alanjian85` for inspiration */
+static int q_merge_two(struct list_head *first, struct list_head *second)
+{
+    if (!first || !second)
+        return 0;
+
+    int count = 0;
+    LIST_HEAD(tmp);
+    while (!list_empty(first) && !list_empty(second)) {
+        element_t *f = list_first_entry(first, element_t, list);
+        element_t *s = list_first_entry(second, element_t, list);
+        if (strcmp(f->value, s->value) <= 0)
+            list_move_tail(&f->list, &tmp);
+        else
+            list_move_tail(&s->list, &tmp);
+        count++;
+    }
+    count += q_size(first) + q_size(second);
+    list_splice(&tmp, first);
+    list_splice_tail_init(second, first);
+
+    return count;
+}
+
 /* Sort elements of queue in ascending order */
 void q_sort(struct list_head *head)
 {
@@ -217,42 +242,24 @@ void q_sort(struct list_head *head)
         return;
 
     /* Find middle point */
-    struct list_head *mid;
-    {
-        struct list_head *left, *right;
-        left = head->next;
-        right = head->prev;
-
-        while (left != right && left->next != right) {
-            left = left->next;
-            right = right->prev;
-        }
-        mid = left;
-    }
+    struct list_head *mid, *left, *right;
+    left = right = head;
+    do {
+        left = left->next;
+        right = right->prev;
+    } while (left != right && left->next != right);
+    mid = left;
 
     /* Divide into two part */
-    LIST_HEAD(left);
-    LIST_HEAD(right);
-
-    list_cut_position(&left, head, mid);
-    list_splice_init(head, &right);
+    LIST_HEAD(second);
+    list_cut_position(&second, mid, head->prev);
 
     /* Conquer */
-    q_sort(&left);
-    q_sort(&right);
+    q_sort(head);
+    q_sort(&second);
 
     /* Merge */
-    while (!list_empty(&left) && !list_empty(&right)) {
-        if (strcmp(list_first_entry(&left, element_t, list)->value,
-                   list_first_entry(&right, element_t, list)->value) <= 0) {
-            list_move_tail(left.next, head);
-        } else {
-            list_move_tail(right.next, head);
-        }
-    }
-
-    list_splice_tail(&left, head);
-    list_splice_tail(&right, head);
+    q_merge_two(head, &second);
 }
 
 /* Remove every node which has a node with a strictly greater value anywhere to
