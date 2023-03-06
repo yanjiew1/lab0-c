@@ -294,26 +294,54 @@ int q_descend(struct list_head *head)
 int q_merge(struct list_head *head)
 {
     // https://leetcode.com/problems/merge-k-sorted-lists/
-    if (!head)
+    if (!head || list_empty(head))
         return 0;
 
-    /**
-     * Not quite optimized but can be done in O(nlogn)
-     * It can be improve later.
-     */
-    LIST_HEAD(tmp);
-    queue_contex_t *it;
-    /**
-     * The macro, list_for_each_entry, exists,
-     * but cppcheck tells me it is unknown
-     */
-    // cppcheck-suppress unknownMacro
-    list_for_each_entry (it, head, chain)
-        list_splice_init(it->q, &tmp);
+    if (list_is_singular(head))
+        return list_first_entry(head, queue_contex_t, chain)->size;
 
-    int size = q_size(&tmp);
-    q_sort(&tmp);
-    list_splice(&tmp, list_first_entry(head, queue_contex_t, chain)->q);
+    /* Use 2-merge algorithm in https://arxiv.org/pdf/1801.04641.pdf */
+    LIST_HEAD(pending);
+    LIST_HEAD(empty);
+    int n = 0;
+    while (!list_empty(head)) {
+        list_move(head->next, &pending);
+        n++;
 
-    return size;
+        while (n > 3) {
+            queue_contex_t *x, *y, *z;
+            x = list_first_entry(&pending, queue_contex_t, chain);
+            y = list_first_entry(&x->chain, queue_contex_t, chain);
+            z = list_first_entry(&x->chain, queue_contex_t, chain);
+
+            if (y->size >= z->size << 1)
+                break;
+
+            if (x->size < z->size) {
+                x->size = q_merge_two(x->q, y->q);
+                list_move(&y->chain, &empty);
+                n--;
+            } else {
+                y->size = q_merge_two(y->q, z->q);
+                list_move(&z->chain, &empty);
+                n--;
+            }
+        }
+    }
+
+    /* Merge remaining list */
+    while (n > 1) {
+        queue_contex_t *x, *y;
+        x = list_first_entry(&pending, queue_contex_t, chain);
+        y = list_first_entry(&x->chain, queue_contex_t, chain);
+        x->size = q_merge_two(x->q, y->q);
+        list_move(&y->chain, &empty);
+        n--;
+    }
+
+    /* Move the last queue and empty queue to head */
+    list_splice(&empty, head);
+    list_splice(&pending, head);
+
+    return list_first_entry(head, queue_contex_t, chain)->size;
 }
