@@ -146,7 +146,7 @@ bool q_delete_dup(struct list_head *head)
     if (!head)
         return false;
 
-    LIST_HEAD(trash);
+    LIST_HEAD(pending);
     element_t *it, *safe;
     struct list_head *cut = head;
 
@@ -157,13 +157,13 @@ bool q_delete_dup(struct list_head *head)
         if (it->list.prev != cut) {
             LIST_HEAD(tmp);
             list_cut_position(&tmp, cut, &it->list);
-            list_splice(&tmp, &trash);
+            list_splice(&tmp, &pending);
         }
         cut = safe->list.prev;
     }
 
-    /* empty trash */
-    list_for_each_entry_safe (it, safe, &trash, list)
+    /* Process pending list */
+    list_for_each_entry_safe (it, safe, &pending, list)
         q_release_element(it);
 
     return true;
