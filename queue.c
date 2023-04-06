@@ -211,7 +211,9 @@ void q_swap(struct list_head *head)
 
 /* Merge two sorted list into `first` list */
 /* Thanks `alanjian85` for inspiration */
-static int q_merge_two(struct list_head *first, struct list_head *second)
+static int q_merge_two(struct list_head *first,
+                       struct list_head *second,
+                       bool descend)
 {
     if (!first || !second)
         return 0;
@@ -221,7 +223,10 @@ static int q_merge_two(struct list_head *first, struct list_head *second)
     while (!list_empty(first) && !list_empty(second)) {
         element_t *f = list_first_entry(first, element_t, list);
         element_t *s = list_first_entry(second, element_t, list);
-        if (strcmp(f->value, s->value) <= 0)
+        int cmp = strcmp(f->value, s->value);
+        if (descend)
+            cmp = -cmp;
+        if (cmp <= 0)
             list_move_tail(&f->list, &tmp);
         else
             list_move_tail(&s->list, &tmp);
@@ -255,15 +260,11 @@ void q_sort(struct list_head *head, bool descend)
     list_cut_position(&second, mid, head->prev);
 
     /* Conquer */
-    q_sort(head, false);
-    q_sort(&second, false);
+    q_sort(head, descend);
+    q_sort(&second, descend);
 
     /* Merge */
-    q_merge_two(head, &second);
-
-    if (descend) {
-        q_reverse(head);
-    }
+    q_merge_two(head, &second, descend);
 }
 
 /* Remove every node which has a node with a strictly less value anywhere to
@@ -352,11 +353,11 @@ int q_merge(struct list_head *head, bool descend)
                 break;
 
             if (x->size < z->size) {
-                y->size = q_merge_two(y->q, x->q);
+                y->size = q_merge_two(y->q, x->q, descend);
                 list_move(&x->chain, &empty);
                 n--;
             } else {
-                z->size = q_merge_two(z->q, y->q);
+                z->size = q_merge_two(z->q, y->q, descend);
                 list_move(&y->chain, &empty);
                 n--;
             }
@@ -368,7 +369,7 @@ int q_merge(struct list_head *head, bool descend)
         queue_contex_t *x, *y;
         x = list_first_entry(&pending, queue_contex_t, chain);
         y = list_first_entry(&x->chain, queue_contex_t, chain);
-        y->size = q_merge_two(y->q, x->q);
+        y->size = q_merge_two(y->q, x->q, descend);
         list_move(&x->chain, &empty);
         n--;
     }
