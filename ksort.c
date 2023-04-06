@@ -19,12 +19,7 @@ static int q_cmp_descend(void *priv,
                          const struct list_head *a,
                          const struct list_head *b)
 {
-    // cppcheck-suppress nullPointer
-    element_t *elem_a = list_entry(a, element_t, list);
-    // cppcheck-suppress nullPointer
-    element_t *elem_b = list_entry(b, element_t, list);
-
-    return strcmp(elem_b->value, elem_a->value);
+    return -q_cmp(priv, a, b);
 }
 
 void q_ksort(struct list_head *head, bool descend)
